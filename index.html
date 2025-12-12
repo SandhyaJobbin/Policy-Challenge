@@ -1,0 +1,2930 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Camera Policy Challenge</title>
+    <script src="/_sdk/data_sdk.js"></script>
+    <script src="/_sdk/element_sdk.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2844 100%);
+            color: #e0e6ed;
+            overflow-x: hidden;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.15;
+        }
+
+        .data-stream {
+            position: absolute;
+            font-size: 40px;
+            opacity: 0.15;
+            animation: propertyFloat 15s linear infinite;
+        }
+
+        @keyframes propertyFloat {
+            0% {
+                transform: translateY(110vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.15;
+            }
+
+            90% {
+                opacity: 0.15;
+            }
+
+            100% {
+                transform: translateY(-10vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Fixed Header */
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(10, 22, 40, 0.95) 0%, rgba(10, 22, 40, 0.85) 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 90, 95, 0.3);
+        }
+
+        /* Branding */
+        .branding {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+        }
+
+        .logo {
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .logo svg {
+            height: 100%;
+            width: auto;
+            filter: drop-shadow(0 0 15px currentColor);
+        }
+
+        .logo-airbnb {
+            color: #FF5A5F;
+        }
+
+        .logo-sutherland {
+            color: #00d4ff;
+            height: 40px;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Progress Orb */
+        .progress-orb {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            z-index: 1001;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .progress-circle {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 8;
+        }
+
+        .progress-indicator {
+            fill: none;
+            stroke: url(#progressGradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 0.5s ease;
+            filter: drop-shadow(0 0 10px rgba(255, 90, 95, 0.8));
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 90, 95, 0.8);
+        }
+
+        /* Main content */
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 130px 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Landing Page */
+        .landing-page {
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #FF5A5F, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 90, 95, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 24px;
+            color: #00d4ff;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00d4ff;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            color: #e0e6ed;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .course-guide {
+            margin: 30px auto;
+            text-align: left;
+            max-width: 700px;
+        }
+
+        .guide-toggle {
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #00d4ff;
+            color: #00d4ff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guide-toggle:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .guide-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .guide-content p {
+            margin: 10px 0;
+            line-height: 1.8;
+            font-size: 16px;
+            color: #2d1810;
+        }
+
+        .guide-content.expanded {
+            max-height: 500px;
+            padding: 20px;
+        }
+
+        .guide-content p {
+            margin: 10px 0;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #FF5A5F, #ff7a7d);
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(255, 90, 95, 0.4);
+            animation: buttonPulse 2s ease-in-out infinite;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 90, 95, 0.6);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        @keyframes buttonPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .question-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .question-prompt {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .question-instruction {
+            font-size: 18px;
+            color: #e0e6ed;
+            margin-bottom: 10px;
+        }
+
+        .hud {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(53, 51, 66, 0.85);
+            border: 2px solid rgba(0, 212, 255, 0.5);
+            border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hud-label {
+            font-size: 12px;
+            color: #00d4ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .hud-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .lives {
+            display: flex;
+            gap: 8px;
+        }
+
+        .heart {
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .heart.lost {
+            opacity: 0.2;
+            filter: grayscale(100%);
+        }
+
+        .timer {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .timer.warning {
+            color: #FF5A5F;
+            animation: timerFlash 0.5s ease-in-out infinite;
+        }
+
+        @keyframes timerFlash {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .timer-message {
+            color: #FF5A5F;
+            font-size: 14px;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .timer-message.show {
+            opacity: 1;
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .scenario-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid rgba(0, 212, 255, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+            border-color: #00d4ff;
+        }
+
+        .scenario-card.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .scenario-image-container {
+            width: 100%;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+            background: linear-gradient(135deg, rgba(255, 200, 150, 0.3), rgba(255, 180, 120, 0.5));
+            position: relative;
+        }
+
+        .scenario-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.85));
+            padding: 30px 15px 15px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .scenario-text {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #fff;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .info-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #00d4ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #00d4ff;
+            font-weight: bold;
+            flex-shrink: 0;
+            cursor: help;
+        }
+
+        .hint-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-hint {
+            padding: 12px 25px;
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #FFC107;
+            color: #FFC107;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hint:hover {
+            background: rgba(255, 193, 7, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-hint:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .hint-text {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 2px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            color: #FFC107;
+            display: none;
+        }
+
+        .hint-text.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Feedback Modal */
+        .feedback-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .feedback-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-content {
+            background: linear-gradient(135deg, #1a2844, #0a1628);
+            border: 3px solid;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .feedback-content.correct {
+            border-color: #4CAF50;
+        }
+
+        .feedback-content.incorrect {
+            border-color: #f44336;
+        }
+
+        .feedback-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .feedback-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .feedback-message {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .btn-continue {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-continue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #FF5A5F;
+            position: absolute;
+            animation: confettiFall 3s linear;
+            z-index: 3000;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Certificate */
+        .certificate-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .mission-accomplished {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FF69B4, #FFD700);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            animation: shimmer 3s linear infinite, glow 2s ease-in-out infinite;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 0% center;
+            }
+
+            100% {
+                background-position: 200% center;
+            }
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 165, 0, 0.6));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 40px rgba(255, 165, 0, 0.8));
+            }
+        }
+
+        .certificate {
+            background: linear-gradient(135deg, #2d1b4e 0%, #4a2c6f 50%, #6b3fa0 100%);
+            border: 5px solid;
+            border-image: linear-gradient(135deg, #FF9966, #FFAB80, #FFB899) 1;
+            border-radius: 15px;
+            padding: 50px;
+            margin: 20px auto;
+            max-width: 750px;
+            box-shadow: 0 15px 50px rgba(255, 153, 102, 0.4),
+                0 0 100px rgba(255, 171, 128, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 153, 102, 0.15), transparent);
+            animation: certificateShine 3s linear infinite;
+        }
+
+        @keyframes certificateShine {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .cert-header {
+            font-size: 42px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-subheader {
+            font-size: 22px;
+            color: #FFA500;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-recipient {
+            font-size: 24px;
+            margin: 30px 0;
+            line-height: 1.8;
+            color: #f0e6ff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-username {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FFD700;
+            display: block;
+            margin: 15px 0;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        .cert-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin: 35px 0;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-stat {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px 30px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .cert-stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FF69B4;
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+        }
+
+        .cert-stat-label {
+            font-size: 14px;
+            color: #FFD700;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .cert-quote {
+            font-style: italic;
+            font-size: 20px;
+            margin: 35px 0;
+            color: #7FFF00;
+            text-shadow: 0 0 15px rgba(127, 255, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cert-signatories {
+            display: flex;
+            justify-content: space-around;
+            margin: 40px 0 20px;
+            flex-wrap: wrap;
+            gap: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .signatory {
+            text-align: center;
+        }
+
+        .signatory-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .signatory-title {
+            font-size: 15px;
+            color: #FFA500;
+            margin-top: 5px;
+        }
+
+        .cert-footer {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(255, 215, 0, 0.4);
+            font-size: 15px;
+            color: #FFD700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-download {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Failure Screen */
+        .failure-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .failure-title {
+            font-size: 48px;
+            color: #f44336;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .failure-quote {
+            font-size: 24px;
+            font-style: italic;
+            margin: 40px 0;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .failure-stats {
+            font-size: 20px;
+            margin: 30px 0;
+        }
+
+        .btn-retry {
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #FF5A5F, #ff7a7d);
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(255, 90, 95, 0.4);
+        }
+
+        .btn-retry:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 90, 95, 0.6);
+        }
+
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #00d4ff;
+        }
+
+        .loading-indicator.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 212, 255, 0.3);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes notificationFade {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+
+            10% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 32px;
+            }
+
+            .game-subtitle {
+                font-size: 18px;
+            }
+
+            .branding {
+                padding: 12px 20px;
+            }
+
+            .logo {
+                height: 35px;
+            }
+
+            .content {
+                padding: 110px 15px 30px;
+            }
+
+            .scenarios-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .question-prompt {
+                font-size: 22px;
+            }
+
+            .question-instruction {
+                font-size: 16px;
+            }
+
+            .hud {
+                gap: 10px;
+            }
+
+            .cert-header {
+                font-size: 28px;
+            }
+
+            .cert-subheader {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <style>
+        @view-transition {
+            navigation: auto;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="app-container"><!-- Animated Background -->
+        <div class="bg-animation" id="bgAnimation"></div><!-- Fixed Header -->
+        <div class="fixed-header">
+            <div class="branding">
+                <div class="logo logo-airbnb">
+                    <svg viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="currentColor"
+                            d="M50 12c-3 0-5.5 2.5-5.5 5.5 0 4.5 5.5 13 5.5 13s5.5-8.5 5.5-13c0-3-2.5-5.5-5.5-5.5zm0 32c-15 0-27 12-27 27v15c0 2 1.5 3.5 3.5 3.5h47c2 0 3.5-1.5 3.5-3.5V71c0-15-12-27-27-27zm-15 22c-1.5 0-3-1.5-3-3s1.5-3 3-3 3 1.5 3 3-1.5 3-3 3zm30 0c-1.5 0-3-1.5-3-3s1.5-3 3-3 3 1.5 3 3-1.5 3-3 3z" />
+                        <circle cx="50" cy="18" r="2" fill="currentColor" />
+                    </svg>
+                </div>
+                <div class="logo logo-sutherland">
+                    <svg viewbox="0 0 180 50" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="5" y="10" width="30" height="30" rx="5" fill="currentColor" opacity="0.3" />
+                        <rect x="15" y="15" width="25" height="25" rx="5" fill="currentColor" opacity="0.6" />
+                        <rect x="25" y="20" width="20" height="20" rx="4" fill="currentColor" /> <text x="55" y="33"
+                            font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="currentColor"
+                            letter-spacing="1">
+                            SUTHERLAND
+                        </text>
+                    </svg>
+                </div>
+            </div>
+            <div class="progress-orb" id="progressOrb">
+                <svg class="progress-circle" viewbox="0 0 100 100">
+                    <defs>
+                        <lineargradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF5A5F;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:1" />
+                        </lineargradient>
+                    </defs>
+                    <circle class="progress-track" cx="50" cy="50" r="45" />
+                    <circle class="progress-indicator" cx="50" cy="50" r="45" id="progressCircle" />
+                </svg>
+                <div class="progress-text" id="progressText">
+                    <div class="progress-question">
+                        0/10
+                    </div>
+                    <div class="progress-label">
+                        QUESTION
+                    </div>
+                </div>
+            </div>
+        </div><!-- Main Content -->
+        <div class="content"><!-- Landing Page -->
+            <main class="landing-page" id="landingPage">
+                <h1 class="game-title" id="gameTitle">Global Camera Policy Challenge</h1>
+                <h2 class="game-subtitle" id="gameSubtitle">The Guardian</h2>
+                <div class="input-group"><label for="username">Username</label> <input type="text" id="username"
+                        placeholder="Enter your username" required>
+                </div>
+                <div class="input-group"><label for="email">Official Email Address</label> <input type="email"
+                        id="email" placeholder="your.email@company.com" required>
+                </div>
+                <div class="course-guide"><button class="guide-toggle" id="guideToggle"> 📚 Course Guide <span
+                            id="guideArrow">▼</span> </button>
+                    <div class="guide-content" id="guideContent">
+                        <p>🎯 <strong>Objective:</strong> Analyze 10 scenarios with 3 images each. Choose the compliant
+                            camera placement.</p>
+                        <p> ️ <strong>Lives:</strong> You have 3 Lives. One wrong choice costs a life.</p>
+                        <p>🏆 <strong>Win Condition:</strong> Score 80% (8/10) to become Certified.</p>
+                        <p>📊 <strong>HUD:</strong> Tracks Score, Question Count (1/10), and Lives.</p>
+                        <p>⏰ <strong>Timer:</strong> 45 seconds per question. Use your time wisely.</p>
+                        <p>💡 <strong>Hint System:</strong> Click "Initialize Hint" for policy guidance.</p>
+                        <p>📷 <strong>Instructions:</strong> Click on the image that follows Airbnb's camera policy.</p>
+                    </div>
+                </div><button class="btn-primary" id="launchBtn">Launch the Policy Challenge</button>
+            </main><!-- Game Screen -->
+            <main class="game-screen" id="gameScreen">
+                <div class="question-header">
+                    <h2 class="question-prompt">Which camera placement is compliant?</h2>
+                    <p class="question-instruction">Select the image that follows Airbnb's camera privacy policy</p>
+                </div>
+                <div class="hud">
+                    <div class="hud-item">
+                        <div class="hud-label">
+                            Question
+                        </div>
+                        <div class="hud-value" id="questionNumber">
+                            1/10
+                        </div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-label">
+                            Score
+                        </div>
+                        <div class="hud-value" id="score">
+                            0
+                        </div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-label">
+                            Lives
+                        </div>
+                        <div class="lives" id="lives"><span class="heart">❤️</span> <span class="heart">❤️</span> <span
+                                class="heart">❤️</span>
+                        </div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-label">
+                            Timer
+                        </div>
+                        <div class="timer" id="timer">
+                            45
+                        </div>
+                        <div class="timer-message" id="timerMessage">
+                            ⏰ TIME'S RUNNING OUT! USE IT WISELY.
+                        </div>
+                    </div>
+                </div>
+                <div class="scenarios-grid" id="scenariosGrid"><!-- Scenarios will be dynamically loaded here -->
+                </div>
+                <div class="hint-section"><button class="btn-hint" id="hintBtn">💡 Initialize Hint</button>
+                    <div class="hint-text" id="hintText"></div>
+                </div>
+            </main><!-- Certificate Screen -->
+            <main class="certificate-screen" id="certificateScreen">
+                <h2 class="mission-accomplished">🎉 MISSION ACCOMPLISHED! 🎉</h2>
+                <div class="certificate">
+                    <div class="cert-header">
+                        Certificate of Completion
+                    </div>
+                    <div class="cert-subheader">
+                        Micro Learning: Mastering Airbnb Privacy Policy
+                    </div>
+                    <div class="cert-recipient">
+                        Presented to <span class="cert-username" id="certUsername">Guardian</span> for completing Policy
+                        Training
+                    </div>
+                    <div class="cert-stats">
+                        <div class="cert-stat">
+                            <div class="cert-stat-value" id="certScore">
+                                0/100
+                            </div>
+                            <div class="cert-stat-label">
+                                Score
+                            </div>
+                        </div>
+                        <div class="cert-stat">
+                            <div class="cert-stat-value" id="certTime">
+                                00:00
+                            </div>
+                            <div class="cert-stat-label">
+                                Time
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cert-quote">
+                        "Mission accomplished! You're now a certified policy guardian."
+                    </div>
+                    <div class="cert-signatories">
+                        <div class="signatory">
+                            <div class="signatory-name" id="evaluatorName">
+                                Sandhya Jobbin
+                            </div>
+                            <div class="signatory-title" id="evaluatorTitle">
+                                Manager
+                            </div>
+                            <div style="margin-top: 5px; font-size: 12px;">
+                                Evaluator
+                            </div>
+                        </div>
+                        <div class="signatory">
+                            <div class="signatory-name" id="coevaluatorName">
+                                Harikrishnan
+                            </div>
+                            <div class="signatory-title" id="coevaluatorTitle">
+                                Assoc. Manager
+                            </div>
+                            <div style="margin-top: 5px; font-size: 12px;">
+                                Co-evaluator
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cert-footer">
+                        <div id="certDate">
+                            Date: --/--/----
+                        </div>
+                        <div style="margin-top: 10px; font-weight: bold;">
+                            ✓ Client Certified
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                    <button class="btn-download" id="downloadPngBtn">📄 Download PNG</button> <button
+                        class="btn-download" id="downloadJpgBtn">🖼️ Download JPG</button> <button class="btn-download"
+                        id="downloadPdfBtn">📋 Download PDF</button>
+                </div>
+                <div class="loading-indicator" id="saveLoading">
+                    <div class="spinner"></div>
+                    <div>
+                        Saving your achievement...
+                    </div>
+                </div>
+            </main><!-- Failure Screen -->
+            <main class="failure-screen" id="failureScreen">
+                <h2 class="failure-title">⚠️ System Failure ⚠️</h2>
+                <div class="failure-quote">
+                    "Why do we fall, Bruce? So we can learn to pick ourselves up."
+                </div>
+                <div class="failure-stats">
+                    <p>Final Score: <strong id="failScore">0</strong>/100</p>
+                    <p>Questions Answered: <strong id="failQuestions">0</strong>/10</p>
+                    <p>Lives Remaining: <strong id="failLives">0</strong></p>
+                </div><button class="btn-retry" id="retryBtn">🔄 Reboot System (Retake Course)</button>
+            </main>
+        </div><!-- Feedback Modal -->
+        <div class="feedback-modal" id="feedbackModal">
+            <div class="feedback-content" id="feedbackContent">
+                <div class="feedback-icon" id="feedbackIcon">
+                    ✓
+                </div>
+                <div class="feedback-title" id="feedbackTitle">
+                    Correct!
+                </div>
+                <div class="feedback-message" id="feedbackMessage">
+                    Great decision!
+                </div><button class="btn-continue" id="continueBtn">Continue </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Configuration
+        const defaultConfig = {
+            game_title: "Global Camera Policy Challenge",
+            game_subtitle: "The Guardian",
+            evaluator_name: "Sandhya Jobbin",
+            evaluator_title: "Manager",
+            coevaluator_name: "Harikrishnan",
+            coevaluator_title: "Assoc. Manager",
+            primary_color: "#FF5A5F",
+            secondary_color: "#00d4ff",
+            success_color: "#4CAF50",
+            warning_color: "#FFC107",
+            danger_color: "#f44336",
+            font_family: "Segoe UI",
+            font_size: 16
+        };
+
+        // Game State
+        let gameState = {
+            username: '',
+            email: '',
+            currentQuestion: 0,
+            score: 0,
+            lives: 3,
+            timer: 45,
+            timerInterval: null,
+            startTime: null,
+            hintsUsed: 0,
+            currentScenarios: []
+        };
+
+        // Question Bank - Each question has 3 scenarios (2 incorrect, 1 correct)
+        // Pool of 40 questions, 10 will be randomly selected
+        const questionBankPool = [
+            {
+                id: 1,
+                hint: 'Policy: Security cameras are never allowed in bedrooms or private sleeping areas.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera on dresser with red light',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras are strictly prohibited in private sleeping areas including bedrooms.'
+                    },
+                    {
+                        emoji: '🛋️',
+                        description: 'Living room with sofa bed, camera pointing at bed',
+                        isCorrect: false,
+                        feedback: 'Violation: Any space used for sleeping is considered private, even converted living rooms.'
+                    },
+                    {
+                        emoji: '🚪',
+                        description: 'Hallway camera mounted high in corner',
+                        isCorrect: true,
+                        feedback: 'Correct! Cameras are allowed in common areas like hallways when properly disclosed.'
+                    }
+                ]
+            },
+            {
+                id: 2,
+                hint: 'Policy: Bathrooms are always private spaces where cameras are forbidden.',
+                scenarios: [
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with dome camera on ceiling',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras in bathrooms are strictly prohibited regardless of disclosure.'
+                    },
+                    {
+                        emoji: '🛁',
+                        description: 'Master bedroom with camera near bathroom door',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras cannot be placed in bedrooms, even if not directly pointing at the bed.'
+                    },
+                    {
+                        emoji: '   ',
+                        description: 'External front door with doorbell camera',
+                        isCorrect: true,
+                        feedback: 'Correct! Doorbell cameras monitoring external entrances are allowed when disclosed.'
+                    }
+                ]
+            },
+            {
+                id: 3,
+                hint: 'Policy: Shared spaces like kitchens can have cameras if disclosed to guests.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Guest bedroom with camera on wall',
+                        isCorrect: false,
+                        feedback: 'Violation: Any room designated as a bedroom is a private space, regardless of furniture.'
+                    },
+                    {
+                        emoji: '🍳',
+                        description: 'Kitchen with camera above sink',
+                        isCorrect: true,
+                        feedback: 'Correct! Cameras in common areas like kitchens are allowed when properly disclosed.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with hidden camera in smoke detector',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in bathrooms are illegal and strictly prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 4,
+                hint: 'Policy: Outdoor common spaces are allowed to have cameras with proper disclosure.',
+                scenarios: [
+                    {
+                        emoji: '🏊',
+                        description: 'Outdoor pool area with camera monitoring deck',
+                        isCorrect: true,
+                        feedback: 'Correct! Outdoor common areas like pools can have security cameras when disclosed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera disguised as alarm clock',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in bedrooms are illegal regardless of disclosure.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom mirror with built-in camera',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras are never permitted in bathrooms under any circumstances.'
+                    }
+                ]
+            },
+            {
+                id: 5,
+                hint: 'Policy: Parking and driveway cameras are allowed for security purposes.',
+                scenarios: [
+                    {
+                        emoji: '🛋️',
+                        description: 'Living room sofa with camera in cushion',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras are not allowed, and disclosure is mandatory.'
+                    },
+                    {
+                        emoji: '    ',
+                        description: 'Parking area with camera monitoring vehicles',
+                        isCorrect: true,
+                        feedback: 'Correct! Security cameras in parking areas are permitted when disclosed to guests.'
+                    },
+                    {
+                        emoji: '🛁',
+                        description: 'Bathroom vent with camera inside',
+                        isCorrect: false,
+                        feedback: 'Violation: Bathrooms are strictly private spaces where cameras are forbidden.'
+                    }
+                ]
+            },
+            {
+                id: 6,
+                hint: 'Policy: Cameras in common living spaces must be visible and disclosed.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom closet with camera inside',
+                        isCorrect: false,
+                        feedback: 'Violation: Bedrooms are private spaces where cameras are never permitted.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom towel rack with hidden camera',
+                        isCorrect: false,
+                        feedback: 'Violation: Any camera placement in bathrooms violates privacy policy.'
+                    },
+                    {
+                        emoji: '📺',
+                        description: 'Living room with visible camera above TV',
+                        isCorrect: true,
+                        feedback: 'Correct! Common living areas can have visible cameras when properly disclosed.'
+                    }
+                ]
+            },
+            {
+                id: 7,
+                hint: 'Policy: External security cameras must not point into private areas.',
+                scenarios: [
+                    {
+                        emoji: '🏡',
+                        description: 'Front yard camera pointing at street',
+                        isCorrect: true,
+                        feedback: 'Correct! External cameras monitoring public areas are allowed with disclosure.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom window with camera pointing inward',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras cannot monitor bedroom spaces from any angle.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom window with external camera',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras cannot be positioned to view into bathrooms, even from outside.'
+                    }
+                ]
+            },
+            {
+                id: 8,
+                hint: 'Policy: Common hallways and entryways can have cameras with disclosure.',
+                scenarios: [
+                    {
+                        emoji: '🚪',
+                        description: 'Apartment building hallway with ceiling camera',
+                        isCorrect: true,
+                        feedback: 'Correct! Cameras in shared hallways are permitted when guests are informed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom door with camera on handle',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras on bedroom doors constitute surveillance of private spaces.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom door with camera above',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras cannot monitor bathroom entrances or interiors.'
+                    }
+                ]
+            },
+            {
+                id: 9,
+                hint: 'Policy: Backyard cameras are allowed if they don\'t view into private spaces.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom balcony with camera facing inward',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras on balconies cannot point into bedroom areas.'
+                    },
+                    {
+                        emoji: '🌳',
+                        description: 'Backyard patio with camera on fence',
+                        isCorrect: true,
+                        feedback: 'Correct! Outdoor backyard cameras are allowed when disclosed to guests.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Outdoor shower area with camera',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras near shower or bathing areas are prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 10,
+                hint: 'Policy: Garage and storage area cameras are permitted with disclosure.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Guest room with camera in lamp',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in sleeping areas are illegal and prohibited.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom cabinet with camera lens',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in bathrooms violate privacy laws.'
+                    },
+                    {
+                        emoji: '🚗',
+                        description: 'Garage with camera monitoring entrance',
+                        isCorrect: true,
+                        feedback: 'Correct! Garage cameras are allowed for security when properly disclosed.'
+                    }
+                ]
+            },
+            {
+                id: 11,
+                hint: 'Policy: Cameras are not allowed in any space where guests have a reasonable expectation of privacy.',
+                scenarios: [
+                    {
+                        emoji: '🚪',
+                        description: 'Entry foyer with camera on wall',
+                        isCorrect: true,
+                        feedback: 'Correct! Entry areas are common spaces where cameras are permitted with disclosure.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Guest room with camera near window',
+                        isCorrect: false,
+                        feedback: 'Violation: All bedrooms are private spaces where cameras are forbidden.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with air freshener camera',
+                        isCorrect: false,
+                        feedback: 'Violation: Disguised cameras in bathrooms are illegal.'
+                    }
+                ]
+            },
+            {
+                id: 12,
+                hint: 'Policy: Smart doorbells and exterior cameras must be disclosed in listings.',
+                scenarios: [
+                    {
+                        emoji: '🚪',
+                        description: 'Smart doorbell camera at main entrance',
+                        isCorrect: true,
+                        feedback: 'Correct! Doorbell cameras are allowed when properly disclosed to guests.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in picture frame',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in bedrooms violate privacy laws.'
+                    },
+                    {
+                        emoji: '🛁',
+                        description: 'Bathroom with camera in towel warmer',
+                        isCorrect: false,
+                        feedback: 'Violation: Any camera device in bathrooms is strictly prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 13,
+                hint: 'Policy: Living rooms and common areas can have visible security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛋️',
+                        description: 'Living room with camera on bookshelf',
+                        isCorrect: true,
+                        feedback: 'Correct! Visible cameras in common living areas are allowed with disclosure.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Master bedroom with camera above headboard',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras cannot be placed in any bedroom space.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in light fixture',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras disguised in bathroom fixtures are illegal.'
+                    }
+                ]
+            },
+            {
+                id: 14,
+                hint: 'Policy: Outdoor entertainment spaces can have cameras for security.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in smoke alarm',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in bedrooms are illegal regardless of form.'
+                    },
+                    {
+                        emoji: '🏖️',
+                        description: 'Outdoor patio with camera on pergola',
+                        isCorrect: true,
+                        feedback: 'Correct! Outdoor common areas can have security cameras when disclosed.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Outdoor shower stall with camera',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras near any bathing area are prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 15,
+                hint: 'Policy: Stairwells and hallways are acceptable locations for security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🪜',
+                        description: 'Stairwell with camera at landing',
+                        isCorrect: true,
+                        feedback: 'Correct! Stairwells are common areas where cameras are permitted.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera behind mirror',
+                        isCorrect: false,
+                        feedback: 'Violation: Two-way mirrors or hidden cameras in bedrooms are illegal.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom exhaust fan with camera',
+                        isCorrect: false,
+                        feedback: 'Violation: Bathrooms must remain completely camera-free.'
+                    }
+                ]
+            },
+            {
+                id: 16,
+                hint: 'Policy: Basement and utility areas can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in teddy bear',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras disguised as toys in bedrooms are illegal.'
+                    },
+                    {
+                        emoji: '🔧',
+                        description: 'Basement utility room with camera',
+                        isCorrect: true,
+                        feedback: 'Correct! Utility areas can have security cameras when disclosed.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in ceiling tile',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in bathroom ceilings are prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 17,
+                hint: 'Policy: Dining rooms and kitchens are common areas where cameras are allowed.',
+                scenarios: [
+                    {
+                        emoji: '🍽️',
+                        description: 'Dining room with camera on hutch',
+                        isCorrect: true,
+                        feedback: 'Correct! Dining areas are common spaces where cameras are permitted.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in alarm clock',
+                        isCorrect: false,
+                        feedback: 'Violation: Clock cameras in bedrooms violate privacy policies.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in medicine cabinet',
+                        isCorrect: false,
+                        feedback: 'Violation: Any camera placement in bathrooms is strictly forbidden.'
+                    }
+                ]
+            },
+            {
+                id: 18,
+                hint: 'Policy: Cameras pointing at neighboring properties must not invade others privacy.',
+                scenarios: [
+                    {
+                        emoji: '🏡',
+                        description: 'Side yard camera pointing at own driveway',
+                        isCorrect: true,
+                        feedback: 'Correct! Cameras monitoring your own property are allowed with disclosure.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom window with inward-facing camera',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras cannot monitor bedroom interiors from any angle.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom skylight with camera above',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras cannot view into bathrooms from any position.'
+                    }
+                ]
+            },
+            {
+                id: 19,
+                hint: 'Policy: Home offices and study areas can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in charging dock',
+                        isCorrect: false,
+                        feedback: 'Violation: Any device with a camera in bedrooms is prohibited.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in soap dispenser',
+                        isCorrect: false,
+                        feedback: 'Violation: Disguised cameras in bathrooms are illegal.'
+                    },
+                    {
+                        emoji: '💻',
+                        description: 'Home office with visible wall camera',
+                        isCorrect: true,
+                        feedback: 'Correct! Office spaces can have security cameras when disclosed.'
+                    }
+                ]
+            },
+            {
+                id: 20,
+                hint: 'Policy: Laundry rooms and shared facilities can have cameras.',
+                scenarios: [
+                    {
+                        emoji: '🧺',
+                        description: 'Shared laundry room with ceiling camera',
+                        isCorrect: true,
+                        feedback: 'Correct! Shared laundry facilities can have security cameras when disclosed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom closet with camera inside',
+                        isCorrect: false,
+                        feedback: 'Violation: Bedroom closets are private spaces where cameras are forbidden.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in electrical outlet',
+                        isCorrect: false,
+                        feedback: 'Violation: Outlet cameras in bathrooms are illegal.'
+                    }
+                ]
+            },
+            {
+                id: 21,
+                hint: 'Policy: Game rooms and entertainment spaces can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in wall outlet',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in bedroom outlets are illegal.'
+                    },
+                    {
+                        emoji: '🎮',
+                        description: 'Game room with camera above pool table',
+                        isCorrect: true,
+                        feedback: 'Correct! Entertainment spaces can have cameras when properly disclosed.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in ventilation grate',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras hidden in bathroom vents are prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 22,
+                hint: 'Policy: Fitness rooms and gyms can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🏋️',
+                        description: 'Home gym with camera on equipment rack',
+                        isCorrect: true,
+                        feedback: 'Correct! Fitness areas are common spaces where cameras are allowed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in tissue box',
+                        isCorrect: false,
+                        feedback: 'Violation: Disguised cameras in bedrooms violate privacy laws.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in shower head',
+                        isCorrect: false,
+                        feedback: 'Violation: Shower cameras are strictly prohibited and illegal.'
+                    }
+                ]
+            },
+            {
+                id: 23,
+                hint: 'Policy: Storage closets and utility spaces can have monitoring cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in book spine',
+                        isCorrect: false,
+                        feedback: 'Violation: Book cameras in bedrooms are illegal surveillance devices.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in hairdryer holder',
+                        isCorrect: false,
+                        feedback: 'Violation: Any bathroom camera is a privacy violation.'
+                    },
+                    {
+                        emoji: '🗄️',
+                        description: 'Storage closet with security camera',
+                        isCorrect: true,
+                        feedback: 'Correct! Storage areas can have security cameras when disclosed to guests.'
+                    }
+                ]
+            },
+            {
+                id: 24,
+                hint: 'Policy: Sunrooms and enclosed porches can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🌞',
+                        description: 'Sunroom with camera on window frame',
+                        isCorrect: true,
+                        feedback: 'Correct! Sunrooms are common areas where cameras are permitted.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in air purifier',
+                        isCorrect: false,
+                        feedback: 'Violation: Appliance cameras in bedrooms are prohibited.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in toothbrush holder',
+                        isCorrect: false,
+                        feedback: 'Violation: Hidden cameras in bathroom accessories are illegal.'
+                    }
+                ]
+            },
+            {
+                id: 25,
+                hint: 'Policy: Mudrooms and entryways are acceptable camera locations.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in digital clock',
+                        isCorrect: false,
+                        feedback: 'Violation: Clock cameras in bedrooms are illegal surveillance.'
+                    },
+                    {
+                        emoji: '👞',
+                        description: 'Mudroom with camera by coat hooks',
+                        isCorrect: true,
+                        feedback: 'Correct! Mudrooms are entry areas where cameras are allowed with disclosure.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in toilet paper holder',
+                        isCorrect: false,
+                        feedback: 'Violation: Any hidden camera in bathrooms is strictly prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 26,
+                hint: 'Policy: Attic spaces and upper levels can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🏠',
+                        description: 'Attic storage with camera at entrance',
+                        isCorrect: true,
+                        feedback: 'Correct! Attic storage areas can have security cameras when disclosed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Loft bedroom with camera in beam',
+                        isCorrect: false,
+                        feedback: 'Violation: Loft bedrooms are sleeping areas where cameras are forbidden.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in towel warmer',
+                        isCorrect: false,
+                        feedback: 'Violation: Cameras in bathroom appliances are illegal.'
+                    }
+                ]
+            },
+            {
+                id: 27,
+                hint: 'Policy: Workshops and hobby rooms can have monitoring cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in fan',
+                        isCorrect: false,
+                        feedback: 'Violation: Fan cameras in bedrooms are prohibited surveillance.'
+                    },
+                    {
+                        emoji: '🔨',
+                        description: 'Workshop with camera on tool board',
+                        isCorrect: true,
+                        feedback: 'Correct! Workshop spaces can have security cameras when disclosed.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in scale',
+                        isCorrect: false,
+                        feedback: 'Violation: Scale cameras in bathrooms violate privacy policies.'
+                    }
+                ]
+            },
+            {
+                id: 28,
+                hint: 'Policy: Conservatories and plant rooms are common areas for cameras.',
+                scenarios: [
+                    {
+                        emoji: '🌿',
+                        description: 'Conservatory with camera on shelf',
+                        isCorrect: true,
+                        feedback: 'Correct! Plant rooms are common areas where cameras are permitted.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in humidifier',
+                        isCorrect: false,
+                        feedback: 'Violation: Humidifier cameras in bedrooms are illegal devices.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in robe hook',
+                        isCorrect: false,
+                        feedback: 'Violation: Hook cameras in bathrooms are strictly prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 29,
+                hint: 'Policy: Wine cellars and bar areas can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in speaker',
+                        isCorrect: false,
+                        feedback: 'Violation: Speaker cameras in bedrooms are prohibited surveillance.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in mirror frame',
+                        isCorrect: false,
+                        feedback: 'Violation: Frame cameras around bathroom mirrors are illegal.'
+                    },
+                    {
+                        emoji: '🍷',
+                        description: 'Wine cellar with camera at entrance',
+                        isCorrect: true,
+                        feedback: 'Correct! Wine cellars and storage areas can have cameras when disclosed.'
+                    }
+                ]
+            },
+            {
+                id: 30,
+                hint: 'Policy: Library and reading rooms can have security monitoring.',
+                scenarios: [
+                    {
+                        emoji: '📚',
+                        description: 'Library room with camera above shelves',
+                        isCorrect: true,
+                        feedback: 'Correct! Library spaces are common areas where cameras are allowed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in lamp base',
+                        isCorrect: false,
+                        feedback: 'Violation: Lamp cameras in bedrooms are illegal surveillance devices.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in cup holder',
+                        isCorrect: false,
+                        feedback: 'Violation: Holder cameras in bathrooms are strictly forbidden.'
+                    }
+                ]
+            },
+            {
+                id: 31,
+                hint: 'Policy: Breakfast nooks and eating areas can have cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in phone charger',
+                        isCorrect: false,
+                        feedback: 'Violation: Charger cameras in bedrooms are prohibited devices.'
+                    },
+                    {
+                        emoji: '☕',
+                        description: 'Breakfast nook with camera on wall',
+                        isCorrect: true,
+                        feedback: 'Correct! Eating areas are common spaces where cameras are permitted.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in soap tray',
+                        isCorrect: false,
+                        feedback: 'Violation: Tray cameras in bathrooms are illegal surveillance.'
+                    }
+                ]
+            },
+            {
+                id: 32,
+                hint: 'Policy: Screened porches and outdoor seating can have cameras.',
+                scenarios: [
+                    {
+                        emoji: '🪑',
+                        description: 'Screened porch with camera on post',
+                        isCorrect: true,
+                        feedback: 'Correct! Screened outdoor areas can have cameras when disclosed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in wall art',
+                        isCorrect: false,
+                        feedback: 'Violation: Art cameras in bedrooms are illegal surveillance.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in lotion dispenser',
+                        isCorrect: false,
+                        feedback: 'Violation: Dispenser cameras in bathrooms are prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 33,
+                hint: 'Policy: Pet areas and animal spaces can have monitoring cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in plant pot',
+                        isCorrect: false,
+                        feedback: 'Violation: Plant cameras in bedrooms are hidden surveillance devices.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in cosmetics case',
+                        isCorrect: false,
+                        feedback: 'Violation: Cosmetic cameras in bathrooms are illegal.'
+                    },
+                    {
+                        emoji: '🐕',
+                        description: 'Pet room with camera above kennels',
+                        isCorrect: true,
+                        feedback: 'Correct! Pet areas can have security cameras when properly disclosed.'
+                    }
+                ]
+            },
+            {
+                id: 34,
+                hint: 'Policy: Craft rooms and sewing spaces can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🧵',
+                        description: 'Craft room with camera on shelf',
+                        isCorrect: true,
+                        feedback: 'Correct! Craft spaces are common areas where cameras are allowed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in stuffed animal',
+                        isCorrect: false,
+                        feedback: 'Violation: Toy cameras in bedrooms are illegal surveillance.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in hair brush',
+                        isCorrect: false,
+                        feedback: 'Violation: Brush cameras in bathrooms are strictly prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 35,
+                hint: 'Policy: Music rooms and studios can have monitoring cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in power strip',
+                        isCorrect: false,
+                        feedback: 'Violation: Power strip cameras in bedrooms are prohibited.'
+                    },
+                    {
+                        emoji: '🎵',
+                        description: 'Music studio with camera on wall mount',
+                        isCorrect: true,
+                        feedback: 'Correct! Music rooms can have security cameras when disclosed to guests.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in faucet',
+                        isCorrect: false,
+                        feedback: 'Violation: Faucet cameras in bathrooms are illegal devices.'
+                    }
+                ]
+            },
+            {
+                id: 36,
+                hint: 'Policy: Playrooms and children activity areas can have cameras.',
+                scenarios: [
+                    {
+                        emoji: '🧸',
+                        description: 'Playroom with camera on toy shelf',
+                        isCorrect: true,
+                        feedback: 'Correct! Playrooms are common areas where cameras are permitted with disclosure.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in desktop monitor',
+                        isCorrect: false,
+                        feedback: 'Violation: Monitor cameras in bedrooms are prohibited surveillance.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in drain cover',
+                        isCorrect: false,
+                        feedback: 'Violation: Drain cameras in bathrooms are illegal and prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 37,
+                hint: 'Policy: Meditation and yoga rooms can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in nightlight',
+                        isCorrect: false,
+                        feedback: 'Violation: Nightlight cameras in bedrooms are illegal devices.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in water heater vent',
+                        isCorrect: false,
+                        feedback: 'Violation: Vent cameras in bathrooms are strictly forbidden.'
+                    },
+                    {
+                        emoji: '🧘',
+                        description: 'Yoga room with camera in corner',
+                        isCorrect: true,
+                        feedback: 'Correct! Meditation spaces can have cameras when disclosed to guests.'
+                    }
+                ]
+            },
+            {
+                id: 38,
+                hint: 'Policy: Billiard rooms and game spaces can have monitoring.',
+                scenarios: [
+                    {
+                        emoji: '🎱',
+                        description: 'Billiard room with camera on wall sconce',
+                        isCorrect: true,
+                        feedback: 'Correct! Game rooms are common areas where cameras are allowed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in curtain rod',
+                        isCorrect: false,
+                        feedback: 'Violation: Rod cameras in bedrooms are hidden surveillance devices.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in light switch',
+                        isCorrect: false,
+                        feedback: 'Violation: Switch cameras in bathrooms are illegal.'
+                    }
+                ]
+            },
+            {
+                id: 39,
+                hint: 'Policy: Theater rooms and media spaces can have security cameras.',
+                scenarios: [
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in coat rack',
+                        isCorrect: false,
+                        feedback: 'Violation: Rack cameras in bedrooms are prohibited surveillance.'
+                    },
+                    {
+                        emoji: '🎬',
+                        description: 'Home theater with camera at back wall',
+                        isCorrect: true,
+                        feedback: 'Correct! Theater rooms can have security cameras when properly disclosed.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in toilet brush holder',
+                        isCorrect: false,
+                        feedback: 'Violation: Holder cameras in bathrooms are strictly prohibited.'
+                    }
+                ]
+            },
+            {
+                id: 40,
+                hint: 'Policy: Balconies and terraces monitoring outward are allowed.',
+                scenarios: [
+                    {
+                        emoji: '🏙️',
+                        description: 'Terrace with camera facing city view',
+                        isCorrect: true,
+                        feedback: 'Correct! Terrace cameras facing outward are allowed when disclosed.'
+                    },
+                    {
+                        emoji: '🛏️',
+                        description: 'Bedroom with camera in ceiling light',
+                        isCorrect: false,
+                        feedback: 'Violation: Ceiling light cameras in bedrooms are illegal surveillance.'
+                    },
+                    {
+                        emoji: '🚿',
+                        description: 'Bathroom with camera in towel bar',
+                        isCorrect: false,
+                        feedback: 'Violation: Bar cameras in bathrooms are strictly forbidden.'
+                    }
+                ]
+            }
+        ];
+
+        // Shuffle and select 10 random questions
+        function getRandomQuestions() {
+            const shuffled = [...questionBankPool].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, 10).map((q, index) => ({ ...q, id: index + 1 }));
+        }
+
+        let questionBank = [];
+
+        // Initialize background animation
+        function initBackground() {
+            const bgAnimation = document.getElementById('bgAnimation');
+            const propertyEmojis = ['🏠', '🏡', '🏘️', '🏢', '🏰', '🏯', '🏛️', '⛺', '🏕️', '🏖️', '🏝️', '🛖'];
+
+            for (let i = 0; i < 15; i++) {
+                const stream = document.createElement('div');
+                stream.className = 'data-stream';
+                stream.textContent = propertyEmojis[Math.floor(Math.random() * propertyEmojis.length)];
+                stream.style.left = `${Math.random() * 100}%`;
+                stream.style.animationDelay = `${Math.random() * 15}s`;
+                stream.style.animationDuration = `${12 + Math.random() * 6}s`;
+                stream.style.filter = `hue-rotate(${Math.random() * 60}deg) brightness(1.2)`;
+                bgAnimation.appendChild(stream);
+            }
+        }
+
+        // Guide toggle
+        document.getElementById('guideToggle').addEventListener('click', function () {
+            const content = document.getElementById('guideContent');
+            const arrow = document.getElementById('guideArrow');
+            content.classList.toggle('expanded');
+            arrow.textContent = content.classList.contains('expanded') ? '▲' : '▼';
+        });
+
+        // Launch game
+        document.getElementById('launchBtn').addEventListener('click', function () {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            if (!username || !email) {
+                showInlineMessage('Please enter both username and email');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showInlineMessage('Please enter a valid email address');
+                return;
+            }
+
+            gameState.username = username;
+            gameState.email = email;
+            gameState.startTime = Date.now();
+
+            // Select 10 random questions for this session
+            questionBank = getRandomQuestions();
+
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            loadQuestion();
+        });
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function showInlineMessage(message) {
+            const existingMessage = document.querySelector('.inline-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'inline-message';
+            messageDiv.style.cssText = 'margin-top: 15px; padding: 12px; background: rgba(244, 67, 54, 0.2); border: 2px solid #f44336; border-radius: 8px; color: #f44336; text-align: center;';
+            messageDiv.textContent = message;
+
+            const launchBtn = document.getElementById('launchBtn');
+            launchBtn.parentNode.insertBefore(messageDiv, launchBtn);
+
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+
+        // Load question
+        function loadQuestion() {
+            if (gameState.currentQuestion >= 10) {
+                endGame();
+                return;
+            }
+
+            const question = questionBank[gameState.currentQuestion];
+            gameState.currentScenarios = question.scenarios;
+
+            // Render scenarios
+            const grid = document.getElementById('scenariosGrid');
+            grid.innerHTML = '';
+
+            question.scenarios.forEach((scenario, index) => {
+                const card = document.createElement('div');
+                card.className = 'scenario-card';
+                card.innerHTML = `
+          <div class="scenario-image-container">
+            ${scenario.emoji}
+            <div class="scenario-label">
+              <div class="scenario-text">${scenario.description}</div>
+              <div class="info-icon">i</div>
+            </div>
+          </div>
+        `;
+
+                card.addEventListener('click', () => handleScenarioClick(scenario, card));
+                grid.appendChild(card);
+            });
+
+            document.getElementById('questionNumber').textContent = `${gameState.currentQuestion + 1}/10`;
+            document.getElementById('hintText').classList.remove('show');
+            document.getElementById('hintText').textContent = question.hint;
+            document.getElementById('hintBtn').disabled = false;
+
+            updateProgress();
+            startTimer();
+        }
+
+        // Handle scenario click
+        function handleScenarioClick(scenario, card) {
+            clearInterval(gameState.timerInterval);
+
+            // Disable all cards
+            document.querySelectorAll('.scenario-card').forEach(c => {
+                c.classList.add('disabled');
+            });
+
+            if (scenario.isCorrect) {
+                gameState.score += 10;
+                document.getElementById('score').textContent = gameState.score;
+                showConfetti();
+            } else {
+                gameState.lives--;
+                updateLives();
+            }
+
+            showFeedback(scenario.isCorrect, scenario.feedback);
+        }
+
+        // Timer
+        function startTimer() {
+            gameState.timer = 45;
+            document.getElementById('timer').textContent = gameState.timer;
+            document.getElementById('timer').classList.remove('warning');
+            document.getElementById('timerMessage').classList.remove('show');
+
+            clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                document.getElementById('timer').textContent = gameState.timer;
+
+                if (gameState.timer === 30) {
+                    document.getElementById('timer').classList.add('warning');
+                    document.getElementById('timerMessage').classList.add('show');
+                }
+
+                if (gameState.timer === 0) {
+                    clearInterval(gameState.timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function handleTimeout() {
+            gameState.lives--;
+            updateLives();
+
+            document.querySelectorAll('.scenario-card').forEach(c => {
+                c.classList.add('disabled');
+            });
+
+            showFeedback(false, 'Time\'s up! You ran out of time to make a decision. The correct answer was the scenario that follows Airbnb\'s camera policy.');
+
+            if (gameState.lives === 0) {
+                setTimeout(() => {
+                    endGame();
+                }, 2000);
+            }
+        }
+
+        // Hint system
+        document.getElementById('hintBtn').addEventListener('click', function () {
+            const hintText = document.getElementById('hintText');
+            if (!hintText.classList.contains('show')) {
+                hintText.classList.add('show');
+                gameState.hintsUsed++;
+                this.disabled = true;
+            }
+        });
+
+        // Feedback modal
+        function showFeedback(correct, message) {
+            const modal = document.getElementById('feedbackModal');
+            const content = document.getElementById('feedbackContent');
+            const icon = document.getElementById('feedbackIcon');
+            const title = document.getElementById('feedbackTitle');
+            const messageEl = document.getElementById('feedbackMessage');
+
+            if (correct) {
+                content.className = 'feedback-content correct';
+                icon.textContent = '✓';
+                title.textContent = 'Correct Decision!';
+            } else {
+                content.className = 'feedback-content incorrect';
+                icon.textContent = '✗';
+                title.textContent = 'Incorrect Decision';
+            }
+
+            messageEl.textContent = message;
+            modal.classList.add('show');
+        }
+
+        document.getElementById('continueBtn').addEventListener('click', function () {
+            document.getElementById('feedbackModal').classList.remove('show');
+
+            if (gameState.lives === 0 || gameState.currentQuestion >= 9) {
+                endGame();
+            } else {
+                gameState.currentQuestion++;
+                loadQuestion();
+            }
+        });
+
+        // Confetti
+        function showConfetti() {
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.top = '0px';
+                    confetti.style.background = ['#FF5A5F', '#00d4ff', '#4CAF50', '#FFC107'][Math.floor(Math.random() * 4)];
+                    confetti.style.width = `${8 + Math.random() * 8}px`;
+                    confetti.style.height = confetti.style.width;
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 40);
+            }
+        }
+
+        // Update lives
+        function updateLives() {
+            const hearts = document.querySelectorAll('.heart');
+            hearts.forEach((heart, index) => {
+                if (index >= gameState.lives) {
+                    heart.classList.add('lost');
+                }
+            });
+        }
+
+        // Update progress
+        function updateProgress() {
+            const progress = ((gameState.currentQuestion + 1) / 10) * 100;
+            const progressCircle = document.getElementById('progressCircle');
+            const progressText = document.getElementById('progressText');
+
+            if (progressCircle && progressText) {
+                const circumference = 283;
+                const offset = circumference - (progress / 100) * circumference;
+                progressCircle.style.strokeDashoffset = offset;
+                progressText.innerHTML = `
+          <div class="progress-question">${gameState.currentQuestion + 1}/10</div>
+          <div class="progress-label">QUESTION</div>
+        `;
+            }
+        }
+
+        // End game
+        async function endGame() {
+            clearInterval(gameState.timerInterval);
+            document.getElementById('gameScreen').style.display = 'none';
+
+            const endTime = Date.now();
+            const totalTime = Math.floor((endTime - gameState.startTime) / 1000);
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            const passed = gameState.score >= 80;
+
+            if (passed) {
+                showCertificate(timeString);
+                await saveResult(true, timeString);
+            } else {
+                showFailure();
+            }
+        }
+
+        function showCertificate(timeString) {
+            document.getElementById('certificateScreen').style.display = 'block';
+            document.getElementById('certUsername').textContent = gameState.username;
+            document.getElementById('certScore').textContent = `${gameState.score}/100`;
+            document.getElementById('certTime').textContent = timeString;
+
+            const today = new Date();
+            document.getElementById('certDate').textContent = `Date: ${today.toLocaleDateString()}`;
+
+            const progressCircle = document.getElementById('progressCircle');
+            const progressText = document.getElementById('progressText');
+            if (progressCircle && progressText) {
+                progressCircle.style.strokeDashoffset = 0;
+                progressText.innerHTML = `
+          <div class="progress-question">10/10</div>
+          <div class="progress-label">COMPLETE</div>
+        `;
+            }
+        }
+
+        function showFailure() {
+            document.getElementById('failureScreen').style.display = 'block';
+            document.getElementById('failScore').textContent = gameState.score;
+            document.getElementById('failQuestions').textContent = gameState.currentQuestion + 1;
+            document.getElementById('failLives').textContent = gameState.lives;
+        }
+
+        // Retry button
+        document.getElementById('retryBtn').addEventListener('click', function () {
+            location.reload();
+        });
+
+        // Generate certificate canvas
+        function generateCertificateCanvas() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = 1400;
+            canvas.height = 1000;
+
+            // Purple gradient background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#2d1b4e');
+            gradient.addColorStop(0.5, '#4a2c6f');
+            gradient.addColorStop(1, '#6b3fa0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Peach border
+            ctx.strokeStyle = '#FF9966';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+            // Inner peach border
+            ctx.strokeStyle = '#FFAB80';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(35, 35, canvas.width - 70, canvas.height - 70);
+
+            // Title
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('CERTIFICATE OF COMPLETION', canvas.width / 2, 120);
+
+            // Subtitle
+            ctx.fillStyle = '#FFA500';
+            ctx.font = '32px Arial';
+            ctx.fillText('Micro Learning: Mastering Airbnb Privacy Policy', canvas.width / 2, 180);
+
+            // "Presented to"
+            ctx.fillStyle = '#f0e6ff';
+            ctx.font = '28px Arial';
+            ctx.fillText('Presented to', canvas.width / 2, 280);
+
+            // Username
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 44px Arial';
+            ctx.fillText(gameState.username, canvas.width / 2, 350);
+
+            // Completion text
+            ctx.fillStyle = '#f0e6ff';
+            ctx.font = '28px Arial';
+            ctx.fillText('for completing Policy Training', canvas.width / 2, 410);
+
+            // Stats boxes background
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(canvas.width / 2 - 280, 470, 200, 100);
+            ctx.fillRect(canvas.width / 2 + 80, 470, 200, 100);
+
+            // Stats
+            ctx.fillStyle = '#FF69B4';
+            ctx.font = 'bold 36px Arial';
+            ctx.fillText(`${gameState.score}/100`, canvas.width / 2 - 180, 520);
+            ctx.fillText(document.getElementById('certTime').textContent, canvas.width / 2 + 180, 520);
+
+            ctx.fillStyle = '#FFD700';
+            ctx.font = '14px Arial';
+            ctx.fillText('SCORE', canvas.width / 2 - 180, 550);
+            ctx.fillText('TIME', canvas.width / 2 + 180, 550);
+
+            // Quote
+            ctx.fillStyle = '#7FFF00';
+            ctx.font = 'italic 26px Arial';
+            ctx.fillText('"Mission accomplished! You\'re now a certified policy guardian."', canvas.width / 2, 650);
+
+            // Signatories
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText(document.getElementById('evaluatorName').textContent, canvas.width / 2 - 250, 770);
+            ctx.fillText(document.getElementById('coevaluatorName').textContent, canvas.width / 2 + 250, 770);
+
+            ctx.fillStyle = '#FFA500';
+            ctx.font = '20px Arial';
+            ctx.fillText(document.getElementById('evaluatorTitle').textContent, canvas.width / 2 - 250, 800);
+            ctx.fillText(document.getElementById('coevaluatorTitle').textContent, canvas.width / 2 + 250, 800);
+
+            ctx.font = '15px Arial';
+            ctx.fillText('Evaluator', canvas.width / 2 - 250, 825);
+            ctx.fillText('Co-evaluator', canvas.width / 2 + 250, 825);
+
+            // Footer
+            ctx.strokeStyle = 'rgba(255, 153, 102, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(200, 870);
+            ctx.lineTo(canvas.width - 200, 870);
+            ctx.stroke();
+
+            ctx.fillStyle = '#FFD700';
+            ctx.font = '22px Arial';
+            const today = new Date();
+            ctx.fillText(`Date: ${today.toLocaleDateString()}`, canvas.width / 2, 920);
+            ctx.fillText('✓ Client Certified', canvas.width / 2, 960);
+
+            return canvas;
+        }
+
+        // Download PNG
+        document.getElementById('downloadPngBtn').addEventListener('click', function () {
+            const canvas = generateCertificateCanvas();
+            const link = document.createElement('a');
+            link.download = `Certificate_${gameState.username}_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showDownloadNotification('Certificate downloaded as PNG!');
+        });
+
+        // Download JPG
+        document.getElementById('downloadJpgBtn').addEventListener('click', function () {
+            const canvas = generateCertificateCanvas();
+            const link = document.createElement('a');
+            link.download = `Certificate_${gameState.username}_${Date.now()}.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 0.95);
+            link.click();
+            showDownloadNotification('Certificate downloaded as JPG!');
+        });
+
+        // Download PDF
+        document.getElementById('downloadPdfBtn').addEventListener('click', function () {
+            const canvas = generateCertificateCanvas();
+            const imgData = canvas.toDataURL('image/png');
+
+            // Create a simple PDF using canvas as image
+            const pdf = document.createElement('canvas');
+            const pdfCtx = pdf.getContext('2d');
+
+            // A4 size at 72 DPI (landscape)
+            pdf.width = 842;
+            pdf.height = 595;
+
+            pdfCtx.fillStyle = 'white';
+            pdfCtx.fillRect(0, 0, pdf.width, pdf.height);
+
+            const img = new Image();
+            img.onload = function () {
+                const scale = Math.min(pdf.width / img.width, pdf.height / img.height) * 0.95;
+                const x = (pdf.width - img.width * scale) / 2;
+                const y = (pdf.height - img.height * scale) / 2;
+
+                pdfCtx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+                const link = document.createElement('a');
+                link.download = `Certificate_${gameState.username}_${Date.now()}.pdf`;
+
+                // Convert to blob for PDF
+                pdf.toBlob(function (blob) {
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                    showDownloadNotification('Certificate downloaded as PDF!');
+                });
+            };
+            img.src = imgData;
+        });
+
+        // Download notification
+        function showDownloadNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+        padding: 30px 50px;
+        border-radius: 15px;
+        font-size: 24px;
+        font-weight: bold;
+        z-index: 3000;
+        box-shadow: 0 10px 40px rgba(76, 175, 80, 0.5);
+        animation: notificationFade 3s ease;
+      `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Data SDK Integration
+        async function saveResult(passed, timeString) {
+            const saveLoading = document.getElementById('saveLoading');
+            saveLoading.classList.add('show');
+
+            const result = await window.dataSdk.create({
+                username: gameState.username,
+                email: gameState.email,
+                score: gameState.score,
+                completionTime: timeString,
+                passed: passed,
+                timestamp: new Date().toISOString()
+            });
+
+            saveLoading.classList.remove('show');
+
+            if (!result.isOk) {
+                console.error('Failed to save result');
+            }
+        }
+
+        const dataHandler = {
+            onDataChanged(data) {
+                // Data is stored but not displayed in this write-only application
+            }
+        };
+
+        // Element SDK Integration
+        async function onConfigChange(config) {
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontSize = config.font_size || defaultConfig.font_size;
+            const fontStack = `${customFont}, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`;
+
+            document.body.style.fontFamily = fontStack;
+            document.body.style.fontSize = `${baseFontSize}px`;
+
+            document.getElementById('gameTitle').textContent = config.game_title || defaultConfig.game_title;
+            document.getElementById('gameSubtitle').textContent = config.game_subtitle || defaultConfig.game_subtitle;
+            document.getElementById('evaluatorName').textContent = config.evaluator_name || defaultConfig.evaluator_name;
+            document.getElementById('evaluatorTitle').textContent = config.evaluator_title || defaultConfig.evaluator_title;
+            document.getElementById('coevaluatorName').textContent = config.coevaluator_name || defaultConfig.coevaluator_name;
+            document.getElementById('coevaluatorTitle').textContent = config.coevaluator_title || defaultConfig.coevaluator_title;
+
+            const primaryColor = config.primary_color || defaultConfig.primary_color;
+            const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+
+            const streams = document.querySelectorAll('.data-stream');
+            streams.forEach(stream => {
+                stream.style.background = `linear-gradient(180deg, transparent, ${primaryColor}, transparent)`;
+            });
+
+            document.querySelectorAll('.logo-airbnb').forEach(el => {
+                el.style.color = primaryColor;
+            });
+
+            document.querySelectorAll('.logo-sutherland').forEach(el => {
+                el.style.color = secondaryColor;
+            });
+
+            const titleElement = document.querySelector('.game-title');
+            titleElement.style.background = `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`;
+            titleElement.style.webkitBackgroundClip = 'text';
+            titleElement.style.backgroundClip = 'text';
+            titleElement.style.fontSize = `${baseFontSize * 3}px`;
+
+            const subtitleElement = document.querySelector('.game-subtitle');
+            subtitleElement.style.fontSize = `${baseFontSize * 1.5}px`;
+            subtitleElement.style.color = secondaryColor;
+        }
+
+        // Initialize SDKs
+        (async function init() {
+            initBackground();
+
+            if (window.dataSdk) {
+                const initResult = await window.dataSdk.init(dataHandler);
+                if (!initResult.isOk) {
+                    console.error('Failed to initialize Data SDK');
+                }
+            }
+
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange,
+                    mapToCapabilities: (config) => ({
+                        recolorables: [
+                            {
+                                get: () => config.primary_color || defaultConfig.primary_color,
+                                set: (value) => {
+                                    config.primary_color = value;
+                                    window.elementSdk.setConfig({ primary_color: value });
+                                }
+                            },
+                            {
+                                get: () => config.secondary_color || defaultConfig.secondary_color,
+                                set: (value) => {
+                                    config.secondary_color = value;
+                                    window.elementSdk.setConfig({ secondary_color: value });
+                                }
+                            },
+                            {
+                                get: () => config.success_color || defaultConfig.success_color,
+                                set: (value) => {
+                                    config.success_color = value;
+                                    window.elementSdk.setConfig({ success_color: value });
+                                }
+                            },
+                            {
+                                get: () => config.warning_color || defaultConfig.warning_color,
+                                set: (value) => {
+                                    config.warning_color = value;
+                                    window.elementSdk.setConfig({ warning_color: value });
+                                }
+                            },
+                            {
+                                get: () => config.danger_color || defaultConfig.danger_color,
+                                set: (value) => {
+                                    config.danger_color = value;
+                                    window.elementSdk.setConfig({ danger_color: value });
+                                }
+                            }
+                        ],
+                        borderables: [],
+                        fontEditable: {
+                            get: () => config.font_family || defaultConfig.font_family,
+                            set: (value) => {
+                                config.font_family = value;
+                                window.elementSdk.setConfig({ font_family: value });
+                            }
+                        },
+                        fontSizeable: {
+                            get: () => config.font_size || defaultConfig.font_size,
+                            set: (value) => {
+                                config.font_size = value;
+                                window.elementSdk.setConfig({ font_size: value });
+                            }
+                        }
+                    }),
+                    mapToEditPanelValues: (config) => new Map([
+                        ['game_title', config.game_title || defaultConfig.game_title],
+                        ['game_subtitle', config.game_subtitle || defaultConfig.game_subtitle],
+                        ['evaluator_name', config.evaluator_name || defaultConfig.evaluator_name],
+                        ['evaluator_title', config.evaluator_title || defaultConfig.evaluator_title],
+                        ['coevaluator_name', config.coevaluator_name || defaultConfig.coevaluator_name],
+                        ['coevaluator_title', config.coevaluator_title || defaultConfig.coevaluator_title]
+                    ])
+                });
+            }
+        })();
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9acc7140c2b06eef',t:'MTc2NTUzNDMzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>
