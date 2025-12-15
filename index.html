@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 
@@ -16,7 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0a1628 0%, #1a2844 100%);
             color: #e0e6ed;
-            overflow-x: hidden;
+            overflow-x: none;
         }
 
         html,
@@ -33,7 +32,7 @@
             height: 100%;
             min-height: 100%;
             position: relative;
-            overflow-y: auto;
+            overflow-y: none;
         }
 
         /* Animated background */
@@ -451,7 +450,7 @@
             border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all ease;
         }
 
         .scenario-card:hover {
@@ -1020,8 +1019,7 @@
                 alt="Airbnb Logo" width="50" height="50" class="header-logo-left">
 
 
-            <img src="sutlogo-s.png"
-                alt="Company Logo" class="header-logo">
+            <img src="sutlogo-s.png" alt="Company Logo" class="header-logo">
         </div>
 
         <div class="content">
@@ -1147,7 +1145,7 @@
                     </div>
                     <div class="cert-signatories">
                         <div class="signatory">
-                            
+
                             <div class="signatory-title" id="evaluatorTitle">
                                 Manager
                             </div>
@@ -1156,7 +1154,7 @@
                             </div>
                         </div>
                         <div class="signatory">
-                           
+
                             <div class="signatory-title" id="coevaluatorTitle">
                                 Assoc. Manager
                             </div>
@@ -1219,9 +1217,9 @@
         const defaultConfig = {
             game_title: "Global Camera Policy Challenge",
             game_subtitle: "The Guardian",
-            
+
             evaluator_title: "Manager",
-            
+
             coevaluator_title: "Assoc. Manager",
             primary_color: "#FF5A5F",
             secondary_color: "#00d4ff",
@@ -2161,6 +2159,7 @@
             }
         })();
     </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9acc7140c2b06eef',t:'MTc2NTUzNDMzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 
-</html>
+    </html>
