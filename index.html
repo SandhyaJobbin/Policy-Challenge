@@ -8,6 +8,7 @@
     <script src="/_sdk/data_sdk.js"></script>
     <script src="/_sdk/element_sdk.js"></script>
     <style>
+        /* ... (Your existing CSS styles remain unchanged from lines 13-1070) ... */
         body {
             box-sizing: border-box;
             margin: 0;
@@ -55,6 +56,7 @@
         }
 
         @keyframes propertyFloat {
+
             0% {
                 transform: translateY(110vh) translateX(0) rotate(0deg);
                 opacity: 0;
@@ -529,6 +531,7 @@
         .btn-hint:hover {
             background: rgba(255, 193, 7, 0.3);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
         }
 
         .btn-hint:disabled {
@@ -946,6 +949,7 @@
         }
 
         @keyframes notificationFade {
+
             0% {
                 opacity: 0;
                 transform: translate(-50%, -50%) scale(0.8);
@@ -1033,7 +1037,7 @@
                         id="email" placeholder="your.email@company.com" required>
                 </div>
                 <div class="course-guide"><button class="guide-toggle" id="guideToggle"> 📚 Course Guide <span
-                            id="guideArrow">▼</span> </button>
+                                id="guideArrow">▼</span> </button>
                     <div class="guide-content" id="guideContent">
                         <p>🎯 <strong>Objective:</strong> Analyze 10 scenarios with 3 images each. Choose the compliant
                             camera placement.</p>
@@ -1145,7 +1149,7 @@
                     </div>
                     <div class="cert-signatories">
                         <div class="signatory">
-
+                            <div class="signatory-name" id="evaluatorName"></div>
                             <div class="signatory-title" id="evaluatorTitle">
                                 Manager
                             </div>
@@ -1154,7 +1158,7 @@
                             </div>
                         </div>
                         <div class="signatory">
-
+                            <div class="signatory-name" id="coevaluatorName"></div>
                             <div class="signatory-title" id="coevaluatorTitle">
                                 Assoc. Manager
                             </div>
@@ -1217,9 +1221,9 @@
         const defaultConfig = {
             game_title: "Global Camera Policy Challenge",
             game_subtitle: "The Guardian",
-
+            evaluator_name: "Sandhya Jobbin",
             evaluator_title: "Manager",
-
+            coevaluator_name: "Harikrishnan",
             coevaluator_title: "Assoc. Manager",
             primary_color: "#FF5A5F",
             secondary_color: "#00d4ff",
@@ -1246,6 +1250,7 @@
 
         // Question Bank - Each question has 3 scenarios (2 incorrect, 1 correct)
         // Pool of 40 questions, 10 will be randomly selected
+
         const questionBankPool = [
             {
                 id: 1,
@@ -1381,7 +1386,7 @@
                         feedback: 'Violation: Bedrooms are private spaces where cameras are never permitted.'
                     },
                     {
-                        emoji: '<img src="Bathroom towel rack with hidden camera.png" alt="Bedroom Camera Violation" class="scenario-image-content">',
+                        emoji: '<img src="Bathroom towel rack with hidden cameraa.png" alt="Bedroom Camera Violation" class="scenario-image-content">',
                         description: 'Bathroom towel rack with hidden camera',
                         isCorrect: false,
                         feedback: 'Violation: Any camera placement in bathrooms violates privacy policy.'
@@ -1494,10 +1499,6 @@
 
         // Shuffle and select 10 random questions
         function getRandomQuestions() {
-            // If the pool is small for testing, duplicate it or handle accordingly. 
-            // Here we assume pool has enough unique items or we pick what we have.
-            // For now, let's just use the pool we defined above (extended to 10 items for demo).
-            // In a real scenario with 40 items, we'd shuffle correctly.
             const shuffled = [...questionBankPool].sort(() => Math.random() - 0.5);
             return shuffled.slice(0, 10).map((q, index) => ({ ...q, id: index + 1 }));
         }
@@ -1609,7 +1610,7 @@
                 grid.appendChild(card);
             });
 
-            // Note: #questionNumber was replaced by the orb logic
+            // document.getElementById('questionNumber').textContent = `${gameState.currentQuestion + 1}/10`;
             document.getElementById('hintText').classList.remove('show');
             document.getElementById('hintText').textContent = question.hint;
             document.getElementById('hintBtn').disabled = false;
@@ -1764,7 +1765,7 @@
                 progressCircle.style.strokeDashoffset = offset;
                 progressText.innerHTML = `
           <div class="progress-question">${gameState.currentQuestion + 1}/10</div>
-          <div class="progress-label">Q</div>
+          <div class="progress-label">QUESTION</div>
         `;
             }
         }
@@ -1784,6 +1785,8 @@
 
             if (passed) {
                 showCertificate(timeString);
+                // The issue here is that the loading indicator is not visible for PDF save, 
+                // but we keep the logic structure.
                 await saveResult(true, timeString);
             } else {
                 showFailure();
@@ -1802,6 +1805,7 @@
             const progressCircle = document.getElementById('progressCircle');
             const progressText = document.getElementById('progressText');
             if (progressCircle && progressText) {
+                const circumference = 283;
                 progressCircle.style.strokeDashoffset = 0;
                 progressText.innerHTML = `
           <div class="progress-question">10/10</div>
@@ -1895,7 +1899,7 @@
             ctx.font = 'italic 26px Arial';
             ctx.fillText('"Mission accomplished! You\'re now a certified policy guardian."', canvas.width / 2, 650);
 
-            // Signatories
+            // Signatories (Fixed in previous step)
             ctx.fillStyle = '#FFD700';
             ctx.font = 'bold 24px Arial';
             ctx.fillText(document.getElementById('evaluatorName').textContent, canvas.width / 2 - 250, 770);
@@ -1964,6 +1968,8 @@
             pdfCtx.fillRect(0, 0, pdf.width, pdf.height);
 
             const img = new Image();
+
+            // FIX 2: Ensure the PDF creation and download only happen after the image is fully loaded.
             img.onload = function () {
                 const scale = Math.min(pdf.width / img.width, pdf.height / img.height) * 0.95;
                 const x = (pdf.width - img.width * scale) / 2;
@@ -1979,8 +1985,19 @@
                     link.href = URL.createObjectURL(blob);
                     link.click();
                     showDownloadNotification('Certificate downloaded as PDF!');
-                });
+                }, 'application/pdf'); // Specify PDF MIME type for better compatibility
+
+                // We don't need to revoke the URL for immediate download link, but it's good practice
+                // to do it after the download is initiated.
+                setTimeout(() => URL.revokeObjectURL(link.href), 1000);
             };
+            
+            // Set onerror handler in case of base64 data corruption or browser issues
+            img.onerror = function() {
+                alert("Failed to load certificate image data for PDF. Download aborted.");
+                console.error("Image loading failed for PDF creation from dataURL.");
+            };
+            
             img.src = imgData;
         });
 
@@ -2009,23 +2026,28 @@
         }
 
         // Data SDK Integration
+        // FIX 1: Use try...finally to ensure the loading indicator is hidden after the operation completes, regardless of success or failure.
         async function saveResult(passed, timeString) {
             const saveLoading = document.getElementById('saveLoading');
             saveLoading.classList.add('show');
 
-            const result = await window.dataSdk.create({
-                username: gameState.username,
-                email: gameState.email,
-                score: gameState.score,
-                completionTime: timeString,
-                passed: passed,
-                timestamp: new Date().toISOString()
-            });
+            try {
+                const result = await window.dataSdk.create({
+                    username: gameState.username,
+                    email: gameState.email,
+                    score: gameState.score,
+                    completionTime: timeString,
+                    passed: passed,
+                    timestamp: new Date().toISOString()
+                });
 
-            saveLoading.classList.remove('show');
-
-            if (!result.isOk) {
-                console.error('Failed to save result');
+                if (!result.isOk) {
+                    console.error('Failed to save result:', result);
+                }
+            } catch (e) {
+                console.error('Data SDK operation failed:', e);
+            } finally {
+                saveLoading.classList.remove('show');
             }
         }
 
@@ -2046,10 +2068,25 @@
 
             document.getElementById('gameTitle').textContent = config.game_title || defaultConfig.game_title;
             document.getElementById('gameSubtitle').textContent = config.game_subtitle || defaultConfig.game_subtitle;
-            document.getElementById('evaluatorName').textContent = config.evaluator_name || defaultConfig.evaluator_name;
-            document.getElementById('evaluatorTitle').textContent = config.evaluator_title || defaultConfig.evaluator_title;
-            document.getElementById('coevaluatorName').textContent = config.coevaluator_name || defaultConfig.coevaluator_name;
-            document.getElementById('coevaluatorTitle').textContent = config.coevaluator_title || defaultConfig.coevaluator_title;
+
+            // Updated elements now exist (from previous fix)
+            const evaluatorNameEl = document.getElementById('evaluatorName');
+            if (evaluatorNameEl) {
+                evaluatorNameEl.textContent = config.evaluator_name || defaultConfig.evaluator_name;
+            }
+            const evaluatorTitleEl = document.getElementById('evaluatorTitle');
+            if (evaluatorTitleEl) {
+                evaluatorTitleEl.textContent = config.evaluator_title || defaultConfig.evaluator_title;
+            }
+            const coevaluatorNameEl = document.getElementById('coevaluatorName');
+            if (coevaluatorNameEl) {
+                coevaluatorNameEl.textContent = config.coevaluator_name || defaultConfig.coevaluator_name;
+            }
+            const coevaluatorTitleEl = document.getElementById('coevaluatorTitle');
+            if (coevaluatorTitleEl) {
+                coevaluatorTitleEl.textContent = config.coevaluator_title || defaultConfig.coevaluator_title;
+            }
+
 
             const primaryColor = config.primary_color || defaultConfig.primary_color;
             const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
@@ -2159,7 +2196,38 @@
             }
         })();
     </script>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9acc7140c2b06eef',t:'MTc2NTUzNDMzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+    <script>
+        (function () {
+            function c() {
+                var b = a.contentDocument || a.contentWindow.document;
+                if (b) {
+                    var d = b.createElement('script');
+                    d.innerHTML = "window.__CF$cv$params={r:'9acc7140c2b06eef',t:'MTc2NTUzNDMzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+                    b.getElementsByTagName('head')[0].appendChild(d)
+                }
+            }
+            if (document.body) {
+                var a = document.createElement('iframe');
+                a.height = 1;
+                a.width = 1;
+                a.style.position = 'absolute';
+                a.style.top = 0;
+                a.style.left = 0;
+                a.style.border = 'none';
+                a.style.visibility = 'hidden';
+                document.body.appendChild(a);
+                if ('loading' !== document.readyState) c();
+                else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c);
+                else {
+                    var e = document.onreadystatechange || function () {};
+                    document.onreadystatechange = function (b) {
+                        e(b);
+                        'loading' !== document.readyState && (document.onreadystatechange = e, c())
+                    }
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>
